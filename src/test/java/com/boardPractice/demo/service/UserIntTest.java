@@ -1,41 +1,54 @@
 package com.boardPractice.demo.service;
 
 import com.boardPractice.demo.domain.User;
-import com.boardPractice.demo.repository.JpaUserRepository;
 import com.boardPractice.demo.repository.UserRepository;
-import jakarta.persistence.EntityManager;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.annotation.Commit;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
-class IntTest {
+class UserIntTest {
     @Autowired UserRepository userRepository;
     @Autowired UserService userService;
 
     @Test
     void join() {
         //given
-        User user = new User();
-        user.setNickname("test0");
-        user.setPhone("01011112222");
-        user.setManner(0);
-        user.setBadge("badge");
-        user.setLocation("Seoul");
-        user.setEmail("test@naver.com");
+        List<User> users = new ArrayList<>();
+
+        for(int i=0;i<10;i++) {
+            User user = new User();
+            user.setNickname("test"+i);
+            user.setPhone("0101111222"+i);
+            user.setManner(36);
+            user.setBadge("badge");
+            user.setLocation("Seoul");
+            user.setPassword("1234");
+            user.setEmail("test"+i+"@naver.com");
+
+            users.add(user);
+        }
 
         //when
-        int saveId = userService.join(user);
+        List<Integer> saveIds = new ArrayList<>();
+        for(int i=0;i<10;i++){
+            int saveId = userService.join(users.get(i));
+            saveIds.add(saveId);
+        }
 
         //then
-        User findUser = userService.findOne(saveId).get();
-        assertThat(user.getNickname()).isEqualTo(findUser.getNickname());
+        for(int i=0;i<10;i++){
+            User findUser = userService.findOne(saveIds.get(i)).get();
+            assertThat(users.get(i).getNickname()).isEqualTo(findUser.getNickname());
+        }
     }
 
     @Test

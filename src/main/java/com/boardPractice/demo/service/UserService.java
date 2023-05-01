@@ -1,8 +1,11 @@
 package com.boardPractice.demo.service;
 
+import com.boardPractice.demo.config.WebSecurityConfig;
 import com.boardPractice.demo.domain.User;
 import com.boardPractice.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
@@ -10,6 +13,10 @@ import java.util.Optional;
 public class UserService {
 
     private final UserRepository userRepository;
+    @Autowired private PasswordEncoder passwordEncoder;
+
+    //private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+
 
     @Autowired
     public UserService(UserRepository userRepository) {
@@ -21,11 +28,14 @@ public class UserService {
      */
 
     public int join(User user){
-        validateDuplicateMember(user);    //중복 회원 검증
+        validateDuplicateMember(user);
+        //비밀번호 암호화
+        user.hashPassword(passwordEncoder);
         userRepository.save(user);
         return user.getUserId();
     }
 
+    //중복 회원 검증
     private void validateDuplicateMember(User user) {
         userRepository.findById(user.getUserId())
                 .ifPresent(m ->{

@@ -1,16 +1,13 @@
-package com.boardPractice.demo;
+package com.boardPractice.demo.config;
 
-import com.boardPractice.demo.repository.JpaUserRepository;
-import com.boardPractice.demo.repository.MemoryUserRepository;
-import com.boardPractice.demo.repository.UserRepository;
+import com.boardPractice.demo.repository.*;
+import com.boardPractice.demo.service.PostService;
 import com.boardPractice.demo.service.UserService;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import javax.sql.DataSource;
 
 @Configuration
 public class SpringConfig {
@@ -34,5 +31,13 @@ public class SpringConfig {
         //return new JdbcMemberRepository(DataSource);
         //return new JdbcTemplateMemberRepository(dataSource);
         return new JpaUserRepository(em);
+    }
+
+    @Bean
+    public PostService postService(){return new PostService(postRepository());}
+
+    @Bean
+    public PostRepository postRepository(){
+        return new JpaPostRepository(em);
     }
 }
