@@ -1,19 +1,20 @@
 package com.boardPractice.demo.service;
 
-import com.boardPractice.demo.config.WebSecurityConfig;
 import com.boardPractice.demo.domain.User;
 import com.boardPractice.demo.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.transaction.annotation.Transactional;
+//import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 public class UserService {
 
     private final UserRepository userRepository;
-    @Autowired private PasswordEncoder passwordEncoder;
+    //@Autowired private PasswordEncoder passwordEncoder;
 
     //private PasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
@@ -30,7 +31,7 @@ public class UserService {
     public int join(User user){
         validateDuplicateMember(user);
         //비밀번호 암호화
-        user.hashPassword(passwordEncoder);
+        //user.hashPassword(passwordEncoder);
         userRepository.save(user);
         return user.getUserId();
     }
@@ -54,5 +55,13 @@ public class UserService {
         return userRepository.findById(userId);
     }
 
+    public void deleteUser(int userId){
+        userRepository.deleteById(userId);
+    }
+
+    public Optional<User> updateUser(int userId, User user){
+
+        return userRepository.updateById(userId, user);
+    }
 
 }

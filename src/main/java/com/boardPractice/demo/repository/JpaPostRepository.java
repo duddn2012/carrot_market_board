@@ -30,4 +30,5 @@ public class JpaPostRepository implements PostRepository{
     public List<Post> findAll() {
         return em.createQuery("select m from Post m", Post.class).getResultList();
     }
+
 }

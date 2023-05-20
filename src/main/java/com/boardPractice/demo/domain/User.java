@@ -3,7 +3,7 @@ package com.boardPractice.demo.domain;
 import com.boardPractice.demo.common.BaseEntity;
 import jakarta.persistence.*;
 import lombok.*;
-import org.springframework.security.crypto.password.PasswordEncoder;
+//import org.springframework.security.crypto.password.PasswordEncoder;
 
 @Getter
 @Setter
@@ -21,7 +21,7 @@ public class User extends BaseEntity {
     private String email;
     private int manner;
     private String badge;
-
+/*
     public User hashPassword(PasswordEncoder passwordEncoder){
         this.password = passwordEncoder.encode(this.password);
         return this;
@@ -30,5 +30,5 @@ public class User extends BaseEntity {
     public boolean checkPassword(String plainPassword, PasswordEncoder passwordEncoder){
         return passwordEncoder.matches(plainPassword, this.password);
     }
-
+*/
 }

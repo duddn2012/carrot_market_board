@@ -1,3 +1,4 @@
+/*
 package com.boardPractice.demo.config;
 
 import org.springframework.context.annotation.Bean;
@@ -9,9 +10,10 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 @EnableWebSecurity
 @Configuration
-public class WebSecurityConfig{
+public class WebSecurityConfig {
     @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
 }
+*/

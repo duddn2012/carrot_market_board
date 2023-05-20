@@ -24,4 +24,15 @@ public class MemoryUserRepository implements UserRepository{
     public List<User> findAll() {
         return new ArrayList<>(store.values());
     }
+
+    @Override
+    public void deleteById(int userId) {
+        store.remove(userId);
+    }
+
+    @Override
+    public Optional<User> updateById(int userId, User user) {
+        User updatedUser = store.replace(userId, user);
+        return Optional.of(updatedUser);
+    }
 }

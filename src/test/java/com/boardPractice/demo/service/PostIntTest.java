@@ -39,7 +39,7 @@ class PostIntTest {
             post.setPriceadvyn("Y");
             post.setShareyn("N");
             post.setTitle("phone sell"+i+"번째 제품");
-            post.setUserId(i);
+            post.setUserId(48+i);   //현재 존재하는 유저 id 기준
             post.setPoststatuscd("0");
 
             posts.add(post);

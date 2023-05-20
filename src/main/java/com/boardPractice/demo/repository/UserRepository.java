@@ -7,6 +7,10 @@ import java.util.Optional;
 
 public interface UserRepository {
     User save(User user);
-    Optional<User> findById(int user_id);
+    Optional<User> findById(int userId);
     List<User> findAll();
+
+    void deleteById(int userId);
+
+    Optional<User> updateById(int userId, User user);
 }

@@ -2,10 +2,12 @@ package com.boardPractice.demo.service;
 
 import com.boardPractice.demo.domain.Post;
 import com.boardPractice.demo.repository.PostRepository;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
 
+@Transactional
 public class PostService {
     private final PostRepository postRepository;
 
