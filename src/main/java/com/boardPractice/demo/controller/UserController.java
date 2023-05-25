@@ -2,6 +2,8 @@ package com.boardPractice.demo.controller;
 
 import com.boardPractice.demo.domain.User;
 import com.boardPractice.demo.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
@@ -14,6 +16,8 @@ import java.util.Optional;
 @Controller
 @RequestMapping("/api/users")
 public class UserController {
+
+    final Logger logger = LoggerFactory.getLogger(this.getClass());
 
     private final UserService userService;
 
@@ -37,6 +41,11 @@ public class UserController {
     @PutMapping("/update/{userId}")
     public ResponseEntity<User> updateUser(@PathVariable("userId") int userId, @RequestBody User updatedUser){
         Optional<User> savedUser = userService.updateUser(userId, updatedUser);
+
+        logger.info("INFO Level LOG");
+        logger.warn("Warn Level LOG");
+        logger.error("ERROR Level LOG");
+
         if(savedUser.isPresent()){
             return ResponseEntity.ok(savedUser.get());
         }else{
@@ -44,7 +53,24 @@ public class UserController {
         }
     }
 
-    @DeleteMapping("/delete/{userId}")
+    @PatchMapping("/update/patch/{userId}")
+    public ResponseEntity<User> updatePatchUser(@PathVariable("userId") int userId, @RequestBody User updatedUser) {
+        Optional<User> optionalUser = userService.findOne(userId);
+        if(optionalUser.isPresent()){
+            User existingUser = optionalUser.get();
+            if (existingUser.getNickname() != null) {
+                existingUser.setNickname(existingUser.getNickname());
+            }
+            if (existingUser.getEmail() != null) {
+                existingUser.setEmail(existingUser.getEmail());
+            }
+            return ResponseEntity.ok(existingUser);
+        } else {
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+        @DeleteMapping("/delete/{userId}")
     public ResponseEntity<Void> deleteUser(@PathVariable("userId") int userId){
         Optional<User> optionalUser = userService.findOne(userId);
         if(optionalUser.isPresent()){
