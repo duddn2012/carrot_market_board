@@ -2,12 +2,17 @@ package com.boardPractice.demo.controller;
 
 import com.boardPractice.demo.domain.User;
 import com.boardPractice.demo.service.UserService;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.client.RestTemplate;
 
 import javax.swing.text.html.Option;
 import java.util.List;
@@ -54,17 +59,50 @@ public class UserController {
     }
 
     @PatchMapping("/update/patch/{userId}")
-    public ResponseEntity<User> updatePatchUser(@PathVariable("userId") int userId, @RequestBody User updatedUser) {
+    public ResponseEntity<User> updatePatchUser(@PathVariable("userId") int userId, @RequestBody User updatedUser) throws JsonProcessingException {
         Optional<User> optionalUser = userService.findOne(userId);
+
         if(optionalUser.isPresent()){
             User existingUser = optionalUser.get();
-            if (existingUser.getNickname() != null) {
-                existingUser.setNickname(existingUser.getNickname());
+            if (updatedUser.getNickname() != null) {
+                existingUser.setNickname(updatedUser.getNickname());
             }
-            if (existingUser.getEmail() != null) {
-                existingUser.setEmail(existingUser.getEmail());
+            if (updatedUser.getEmail() != null) {
+                existingUser.setEmail(updatedUser.getEmail());
             }
-            return ResponseEntity.ok(existingUser);
+
+            if (updatedUser.getLocation() != null) {
+                String location = updatedUser.getLocation();
+
+                String internalUrl = "http://localhost:8008/util/getAddressApi?currentPage=" + "1" +
+                        "&countPerPage=" + "10" +
+                        "&resultType=" + "json" +
+                        "&confmKey=" + "devU01TX0FVVEgyMDIzMDUyODE0NTczMTExMzgwNjk=" +
+                        "&keyword=" + location;//URLEncoder.encode(keyword, "UTF-8");
+
+                RestTemplate restTemplate = new RestTemplate();
+                ResponseEntity<String> responseLocationValid = restTemplate.getForEntity(internalUrl, String.class);
+
+                if(responseLocationValid.getStatusCode() == HttpStatus.OK){
+                    String responseData = responseLocationValid.getBody();
+                    ObjectMapper mapper = new ObjectMapper();
+                    JsonNode jsonNode = mapper.readTree(responseData);
+
+                    logger.warn(String.valueOf(jsonNode.get("results").get("juso").size()));
+                    //주소 valid 체크
+                    if(jsonNode.get("results").get("juso").size()>0){
+                        logger.warn(jsonNode.get("results").get("juso").get(0).get("roadAddr").asText());
+                        existingUser.setLocation(jsonNode.get("results").get("juso").get(0).get("roadAddr").asText());
+                    }
+                }else{
+                    throw new RuntimeException("Internal API call failed");
+                }
+
+            }
+
+            Optional<User> savedUser = userService.updateUser(userId, existingUser);
+
+            return ResponseEntity.ok(savedUser.get());
         } else {
             return ResponseEntity.notFound().build();
         }
