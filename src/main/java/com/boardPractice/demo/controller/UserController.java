@@ -5,12 +5,14 @@ import com.boardPractice.demo.service.UserService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.util.JSONPObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.stereotype.Controller;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
 
@@ -130,6 +132,51 @@ public class UserController {
             return ResponseEntity.ok(user);
         }else{
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @GetMapping("/auth/kakao")
+    public String kakaoLogIn(){
+        RestTemplate restTemplate = new RestTemplate();
+        String apiUrl = "https://kauth.kakao.com/oauth/authorize?client_id=50bc6e2978af614681813952d0053556&redirect_uri=https://umcpractice.shop/api/users/oauth/kakao&response_type=code";
+
+        ResponseEntity<String> authCode = restTemplate.getForEntity(apiUrl, String.class);
+
+        return "redirect:" + apiUrl;
+    }
+
+
+    @GetMapping("/oauth/kakao")
+    @ResponseBody
+    public ResponseEntity<String> getKakaoAccessToken(@RequestParam("code") String code){
+        try{
+            String apiUrl = "https://kauth.kakao.com/oauth/token";
+
+            HttpHeaders headers = new HttpHeaders();
+            //headers.add("Conent-type","application/x-www-form-urlencoded;charset=utf-8");
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+            MultiValueMap<String, String> requestBody = new LinkedMultiValueMap<>();
+            requestBody.add("grant_type", "authorization_code");
+            requestBody.add("client_id", "50bc6e2978af614681813952d0053556");
+            requestBody.add("redirect_uri", "https://umcpractice.shop/api/users/oauth/kakao");
+            requestBody.add("code", code);
+
+            RestTemplate restTemplate = new RestTemplate();
+            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(requestBody, headers);
+
+            //API 호출
+            ResponseEntity<String> responseEntity = restTemplate.exchange(apiUrl, HttpMethod.POST,requestEntity, String.class);
+
+            String tokenJson = responseEntity.getBody();
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonNode = mapper.readTree(tokenJson);
+            String accessToken = String.valueOf(jsonNode.get("access_token"));
+
+            return ResponseEntity.status(500).body(accessToken);
+
+        } catch (Exception e) {
+            return ResponseEntity.status(500).body("Error occurred: " + e.getMessage());
         }
     }
 
